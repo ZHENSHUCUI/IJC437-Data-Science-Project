@@ -1,12 +1,14 @@
 rm(list = ls())
-install.packages(c("tidyverse", "caret", "randomForest", "xgboost", "pROC", "dplyr"))
-
+install.packages(c("tidyverse", "caret", "randomForest", "xgboost", "pROC", 
+                   "dplyr",”ggplot2”,”patchwork”))
 library(tidyverse)
 library(caret)
 library(randomForest)
 library(xgboost)
 library(pROC)
 library(dplyr)
+library(ggplot2)
+library(patchwork)
 
 setwd("C:/Users/User/Desktop/10/heluo/")
 
@@ -53,9 +55,7 @@ full_data <- bind_rows(
   all_negative_samples %>% select(song_id, target, ranking, year, all_of(audio_features))
 )
 
-
 # DESCRIPTIVE STATISTICS ANALYSIS
-
 
 # Data structure overview
 cat("Data dimensions:", dim(full_data), "\n")
@@ -199,10 +199,6 @@ for (feature in audio_features) {
 combined_feature_target <- wrap_plots(feature_target_plots, ncol = 2)
 print(combined_feature_target)
 
-
-#Part 2
-
-
 # Train-test split
 set.seed(123)
 train_index <- createDataPartition(full_data$target, p = 0.7, list = FALSE)
@@ -318,18 +314,10 @@ results <- data.frame(
   Recall = c(logit_recall, rf_recall, xgb_recall),
   F1_Score = c(logit_f1, rf_f1, xgb_f1)
 )
-
-
 print(results)
 
 
-
-
 # INDIVIDUAL FEATURE IMPORTANCE PLOTS
-
-library(ggplot2)
-library(dplyr)
-library(patchwork)
 
 #  Logistic Regression Feature Importance (Coefficient Magnitude)
 logit_coef <- summary(logit_full)$coefficients[-1, ]  # Remove intercept
@@ -386,7 +374,6 @@ p_xgb <- ggplot(xgb_importance_df, aes(x = reorder(Feature, Importance), y = Imp
 
 # COMBINE ALL PLOTS
 
-
 # Arrange all three plots together
 combined_plot <- p_logit / p_rf / p_xgb +
   plot_annotation(title = "Feature Importance Analysis: Billboard Hot 100 Prediction",
@@ -400,10 +387,7 @@ ggsave("Individual_Feature_Importance_Plots.png", combined_plot,
        width = 12, height = 15, dpi = 300)
 
 
-
 # ALTERNATIVE: SIDE-BY-SIDE COMPARISON
-
-
 
 # Normalize importance scores for better comparison
 normalize_importance <- function(importance_df) {
