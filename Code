@@ -1,11 +1,12 @@
 rm(list = ls())
-install.packages(c("tidyverse", "caret", "randomForest", "xgboost", "pROC", 
-                   "patchwork", "corrplot", "naniar"))
+install.packages(c("tidyverse", "caret", "randomForest", "xgboost", "pROC", "dplyr"))
+
 library(tidyverse)
 library(caret)
 library(randomForest)
 library(xgboost)
 library(pROC)
+library(dplyr)
 
 setwd("C:/Users/User/Desktop/10/heluo/")
 
@@ -63,6 +64,23 @@ cat("Column names:", colnames(full_data), "\n")
 # View data structure
 str(full_data)
 summary(full_data)
+
+group_stats_table <- full_data %>%
+  group_by(target) %>%
+  summarise(across(all_of(audio_features), 
+                   list(mean = ~mean(., na.rm = TRUE),
+                        sd = ~sd(., na.rm = TRUE),
+                        median = ~median(., na.rm = TRUE)), 
+                   .names = "{.col}_{.fn}")) %>%
+  pivot_longer(cols = -target, names_to = "stat", values_to = "value") %>%
+  separate(stat, into = c("feature", "statistic"), sep = "_") %>%
+  pivot_wider(names_from = c(target, statistic), values_from = value) %>%
+  rename(Feature = feature)
+group_stats_table <- group_stats_table %>%
+  rename_with(~ stringr::str_replace(., "^0_", "NonBillboard_"), .cols = contains("0_")) %>%
+  rename_with(~ stringr::str_replace(., "^1_", "Billboard_"), .cols = contains("1_"))
+
+print(group_stats_table, width = Inf)
 
 # Missing value analysis
 missing_values <- colSums(is.na(full_data))
