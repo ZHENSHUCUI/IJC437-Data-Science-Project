@@ -1,4 +1,4 @@
-# IJC437-Data-Science-Project
+# IJC414-Data-Society-Project
 
 This project provides a critical analysis of AI governance within a hypothetical UK National Police (UNP) organisation.
 Analyses limitations in current approaches to transparency, public trust, accountability, human oversight, and algorithmic bias in policing AI systems.
